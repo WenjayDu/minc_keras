@@ -142,14 +142,14 @@ def prepare_data(source_dir, data_dir, report_dir, input_str, label_str, ratios=
     temp_image_dim = get_image_dim(images.iloc[0].label)
     data["image_dim"] = [temp_image_dim[0], pad(temp_image_dim[1], pad_base), pad(temp_image_dim[2], pad_base)]
 
-    print("1", temp_image_dim)
-    print("2", data["image_dim"])
+    print("original input shape", temp_image_dim)
+    print("input shape after processed", data["image_dim"])
 
     ### 4) Set up dimensions of data tensors to be used for training and validateing. all of the
     if not exists(data["train_x_fn"] + '.npy') or not exists(data["train_y_fn"] + '.npy') or clobber:
         feature_extraction(train_images, temp_image_dim, data["image_dim"], data["train_x_fn"], data["train_y_fn"],
                            data_dir, clobber, pad_base=pad_base)
-    if not exists(data["validate_x_fn"] + '.npy') or not exists(["validate_y_fn"] + '.npy') or clobber:
+    if not exists(data["validate_x_fn"] + '.npy') or not exists(data["validate_y_fn"] + '.npy') or clobber:
         feature_extraction(validate_images, temp_image_dim, data["image_dim"], data["validate_x_fn"],
                            data["validate_y_fn"], data_dir, clobber, pad_base=pad_base)
     if not exists(data["test_x_fn"] + '.npy') or not exists(data["test_y_fn"] + '.npy') or clobber:
