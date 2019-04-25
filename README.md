@@ -11,4 +11,4 @@ Paul Lemaitre
 Andrew Doyle
 
 ## Statement
-This repo has been adjusted and modified for my graduation project, you can get the [original repo here](https://github.com/tfunck/minc_keras).
+This repo has been adjusted and modified for [my graduation project](https://github.com/WenjayDu/GraduationProject), you can get the [original repo here](https://github.com/tfunck/minc_keras).
