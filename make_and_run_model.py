@@ -1,4 +1,6 @@
 import json
+import os
+import sys
 from math import sqrt
 
 import keras
@@ -10,7 +12,10 @@ from keras.layers.convolutional import UpSampling2D
 from keras.layers.core import Dropout
 from keras.utils import to_categorical
 
-from .utils import *
+curPath = os.path.abspath(os.path.dirname(__file__))
+rootPath = os.path.split(curPath)[0]
+sys.path.append(rootPath)
+from utils import *
 
 
 def make_unet(image_dim, nlabels, activation_hidden, activation_output, verbose=0):

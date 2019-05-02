@@ -1,7 +1,8 @@
 import os
+from os.path import splitext, basename
+
 import h5py
 import numpy as np
-from os.path import splitext, basename, exists
 from keras import backend as K
 
 global categorical_functions

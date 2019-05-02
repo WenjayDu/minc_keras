@@ -2,7 +2,9 @@ import json
 import os
 from os.path import splitext, basename
 
-# mpl.use('Agg')
+import matplotlib as mpl
+
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 

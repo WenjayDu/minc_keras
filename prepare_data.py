@@ -1,5 +1,5 @@
-from .set_images import *
-from .utils import *
+from set_images import *
+from utils import *
 
 
 def adjust_batch_size(n1, n2, batch_size):

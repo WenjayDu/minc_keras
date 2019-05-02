@@ -1,14 +1,19 @@
 import argparse
-from os import makedirs
+import os
+import sys
 
-from .plot_metrics import *
-from .prepare_data import *
-from .make_and_run_model import *
+curPath = os.path.abspath(os.path.dirname(__file__))
+rootPath = os.path.split(curPath)[0]
+sys.path.append(rootPath)
+
+from plot_metrics import *
+from prepare_data import *
+from make_and_run_model import *
 
 
 def create_dir_verbose(directory):
     if not exists(directory):
-        makedirs(directory)
+        os.makedirs(directory)
         print("Created directory:", directory)
     return directory
 

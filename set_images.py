@@ -1,3 +1,5 @@
+import os
+import sys
 import time
 from glob import glob
 from re import sub
@@ -5,7 +7,11 @@ from sys import argv, exit
 
 import pandas as pd
 
-from .utils import *
+curPath = os.path.abspath(os.path.dirname(__file__))
+rootPath = os.path.split(curPath)[0]
+sys.path.append(rootPath)
+
+from utils import *
 
 np.random.seed(int(time.time()))
 
@@ -182,7 +188,7 @@ def create_out(dfd):
 
     out = pd.DataFrame(columns=dfd[list(dfd.keys())[0]].columns)
     for k, v in dfd.items():
-        out = pd.concat([out, v])  # ,sort=True)
+        out = pd.concat([out, v], sort=True)
     out["category"] = "unknown"
     out.reset_index(inplace=True, drop=True)
     return (out)
@@ -228,7 +234,7 @@ def attribute_category(out, category, category_class, ratio, verbose=1):
 
     if verbose > 0:
         print(category, ": expected/real ratio = %3.2f / %3.2f" % (
-        100. * ratio, 100. * out.category.loc[out.category == category].shape[0] / nImages))
+            100. * ratio, 100. * out.category.loc[out.category == category].shape[0] / nImages))
 
 
 def set_valid_samples(images):

@@ -1,5 +1,5 @@
 from keras import backend as K
-import numpy as np
+
 
 def dice_loss(y_true, y_pred):
     """
@@ -14,9 +14,9 @@ def dice_loss(y_true, y_pred):
     ytf = K.flatten(y_true)
     ypf = K.flatten(y_pred)
 
-    overlap = K.sum(ytf*ypf)
-    total = K.sum(ytf*ytf) + K.sum(ypf * ypf)
-    return -(2*overlap +1e-10) / (total + 1e-10)
+    overlap = K.sum(ytf * ypf)
+    total = K.sum(ytf * ytf) + K.sum(ypf * ypf)
+    return -(2 * overlap + 1e-10) / (total + 1e-10)
 
 
 def dice_metric(y_true, y_pred):
@@ -28,10 +28,10 @@ def dice_metric(y_true, y_pred):
     Returns
     :return: DICE coefficient
     """
-    #ytf = K.round(K.flatten(y_true))
-    #ypf = K.round(K.flatten(y_pred))
+    # ytf = K.round(K.flatten(y_true))
+    # ypf = K.round(K.flatten(y_pred))
 
-    #overlap = 2*K.sum(ytf*ypf)
-    #total = K.sum(ytf*ytf) + K.sum(ypf * ypf)
-    #return overlap / total
-    return -1* dice_loss(y_true, y_pred)
+    # overlap = 2*K.sum(ytf*ypf)
+    # total = K.sum(ytf*ytf) + K.sum(ypf * ypf)
+    # return overlap / total
+    return -1 * dice_loss(y_true, y_pred)
