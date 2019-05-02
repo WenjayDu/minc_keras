@@ -13,8 +13,7 @@ from keras.layers.core import Dropout
 from keras.utils import to_categorical
 
 curPath = os.path.abspath(os.path.dirname(__file__))
-rootPath = os.path.split(curPath)[0]
-sys.path.append(rootPath)
+sys.path.append(curPath)
 from utils import *
 
 

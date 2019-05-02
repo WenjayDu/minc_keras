@@ -3,16 +3,16 @@ import os
 import sys
 
 curPath = os.path.abspath(os.path.dirname(__file__))
-rootPath = os.path.split(curPath)[0]
-sys.path.append(rootPath)
+sys.path.append(curPath)
 
 from plot_metrics import *
 from prepare_data import *
 from make_and_run_model import *
+from predict import predict
 
 
 def create_dir_verbose(directory):
-    if not exists(directory):
+    if not os.path.exists(directory):
         os.makedirs(directory)
         print("Created directory:", directory)
     return directory
@@ -63,7 +63,7 @@ def minc_keras(source_dir, target_dir, input_str, label_str, ratios, feature_dim
     history_fn = splitext(model_fn)[0] + '_history.json'
 
     print('Model:', model_fn)
-    if not exists(model_fn) or clobber:
+    if not os.path.exists(model_fn) or clobber:
         # If model_fn does not exist, or user wishes to write over (clobber) existing model
         # then train a new model and save it
         X_train = np.load(data["train_x_fn"] + '.npy')
@@ -73,7 +73,7 @@ def minc_keras(source_dir, target_dir, input_str, label_str, ratios, feature_dim
                                          nb_epoch, nlabels, loss=loss, verbose=verbose)
 
     ### 3) Evaluate model on test data
-    model = load_model(model_fn)
+    model = keras.models.load_model(model_fn)
     X_test = np.load(data["test_x_fn"] + '.npy')
     Y_test = np.load(data["test_y_fn"] + '.npy')
     if loss in categorical_functions:

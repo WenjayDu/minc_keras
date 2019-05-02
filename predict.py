@@ -1,3 +1,5 @@
+import os
+import sys
 import argparse
 import matplotlib as mpl
 
@@ -6,6 +8,8 @@ import matplotlib.pyplot as plt
 from keras.models import load_model
 from keras.utils.generic_utils import get_custom_objects
 
+curPath = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(curPath)
 from prepare_data import *
 
 get_custom_objects().update({"dice_metric": dice_metric})
@@ -194,7 +198,7 @@ def predict(model_fn, predict_dir, data_dir, images_fn, loss, evaluate=False, ca
         return 0
 
     # check that the model exists and load it
-    if exists(model_fn):
+    if os.path.exists(model_fn):
         model = load_model(model_fn)
         if verbose >= 1: print("🚩️Model successfully loaded", model)
     else:

@@ -1,3 +1,8 @@
+import os
+import sys
+
+curPath = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(curPath)
 from set_images import *
 from utils import *
 
@@ -121,7 +126,7 @@ def prepare_data(source_dir, data_dir, report_dir, input_str, label_str, ratios=
     if images_fn == None: images_fn = report_dir + os.sep + 'images.csv'
     ### 1) Organize inputs into a data frame, match each PET image with label image
 
-    if not exists(images_fn) or clobber:
+    if not os.path.exists(images_fn) or clobber:
         ### set_images is a very important function that will find dataall the PET images and their
         ### corresponding labelled images from source_dir. This function uses <input_str> and <label_str>
         ### to identify which files are inputs and labeles, respectively. The images use the BIDS file format
@@ -146,15 +151,18 @@ def prepare_data(source_dir, data_dir, report_dir, input_str, label_str, ratios=
     print("input shape after processed", data["image_dim"])
 
     ### 4) Set up dimensions of data tensors to be used for training and validateing. all of the
-    if not exists(data["train_x_fn"] + '.npy') or not exists(data["train_y_fn"] + '.npy') or clobber:
-        feature_extraction(train_images, temp_image_dim, data["image_dim"], data["train_x_fn"], data["train_y_fn"],
-                           data_dir, clobber, pad_base=pad_base)
-    if not exists(data["validate_x_fn"] + '.npy') or not exists(data["validate_y_fn"] + '.npy') or clobber:
-        feature_extraction(validate_images, temp_image_dim, data["image_dim"], data["validate_x_fn"],
-                           data["validate_y_fn"], data_dir, clobber, pad_base=pad_base)
-    if not exists(data["test_x_fn"] + '.npy') or not exists(data["test_y_fn"] + '.npy') or clobber:
-        feature_extraction(test_images, temp_image_dim, data["image_dim"], data["test_x_fn"], data["test_y_fn"],
-                           data_dir, clobber)
+    if not os.path.exists(data["train_x_fn"] + '.npy') or not os.path.exists(data["train_y_fn"] + '.npy') or clobber:
+        feature_extraction(train_images, temp_image_dim, data["image_dim"],
+                           data["train_x_fn"], data["train_y_fn"], data_dir, clobber, pad_base=pad_base)
+
+    if not os.path.exists(data["validate_x_fn"] + '.npy') or not \
+            os.path.exists(data["validate_y_fn"] + '.npy') or clobber:
+        feature_extraction(validate_images, temp_image_dim, data["image_dim"],
+                           data["validate_x_fn"], data["validate_y_fn"], data_dir, clobber, pad_base=pad_base)
+
+    if not os.path.exists(data["test_x_fn"] + '.npy') or not os.path.exists(data["test_y_fn"] + '.npy') or clobber:
+        feature_extraction(test_images, temp_image_dim, data["image_dim"],
+                           data["test_x_fn"], data["test_y_fn"], data_dir, clobber)
 
     data["batch_size"] = adjust_batch_size(train_valid_samples, validate_valid_samples, batch_size)
     return [images, data]
