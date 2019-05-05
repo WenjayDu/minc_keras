@@ -32,10 +32,10 @@ def gather_dirs(source_dir, input_str='acq', ext='mnc'):
     input_str = os.path.splitext(input_str)[0]
     subject_dirs = glob(source_dir + os.sep + '*', recursive=True)
     pet_list = glob(source_dir + os.sep + '**' + os.sep + '*' + input_str + '*.' + ext, recursive=True)
-    if pet_list == []:
+    if not pet_list:
         print("Error -- could not find any files for :")
         print(source_dir + os.sep + '**' + os.sep + '*' + input_str + '.' + ext)
-        exit(1)
+        sys.exit(1)
     names = [basename(f) for f in subject_dirs]
     # return(subject_dirs, pet_list, t1_list, names)
     return (subject_dirs, pet_list, names)
@@ -52,7 +52,7 @@ def print_error_nosubject(source_dir):
     print('No data found in directory :' + source_dir)
     print('Are you sure this is the right directory ?')
     print('Exiting gracefully')
-    exit()
+    sys.exit(1)
 
 
 def print_error_nosumone(ratio):
@@ -68,7 +68,7 @@ def print_error_nosumone(ratio):
     print('The sum of ' + str(ratio) + ' is not one.')
     print('Check again your test/train ratios')
     print('Exiting gracefully')
-    exit()
+    sys.exit(1)
 
 
 # def createdf(name, pet_names, pet, t1, labels, task=False):
@@ -182,7 +182,7 @@ def create_out(dfd):
     '''
     if len(list(dfd.keys())) == 0:
         print('Error: subject data frame was empty')
-        exit(1)
+        sys.exit(1)
 
     out = pd.DataFrame(columns=dfd[list(dfd.keys())[0]].columns)
     for k, v in dfd.items():

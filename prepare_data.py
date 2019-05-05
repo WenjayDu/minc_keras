@@ -3,6 +3,7 @@ import sys
 
 curPath = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(curPath)
+
 from set_images import *
 from utils import *
 
@@ -29,20 +30,20 @@ def pad(x, n):
 
 def feature_extraction(images, temp_image_dim, pad_image_dim, x_output_file, y_output_file, data_dir, clobber,
                        pad_base=0):
-    nSubjects = images.shape[0]  # total number f subjects
+    # Set up the total number of valid slices for each subject
     total_valid_slices = images.valid_samples.values.sum()
-    # Set up the number of valid slices for each subject
 
     if pad_base % 1 != 0 or pad_base < 0:
         print("Error: <pad_base> must be a integer great than or equal to 0.")
-        exit(1)
+        sys.exit(1)
 
     f = h5py.File(data_dir + os.sep + 'temp.hdf5', "w")
     X_f = f.create_dataset("image", [total_valid_slices, pad_image_dim[1], pad_image_dim[2], 1], dtype='float16')
     Y_f = f.create_dataset("label", [total_valid_slices, pad_image_dim[1], pad_image_dim[2], 1], dtype='float16')
     total_index = 0
     for index, row in images.iterrows():
-        if index % 10 == 0: print("Saving", images["category"][0], "images:", index, '/', images.shape[0], end='\r')
+        if index % 10 == 0:
+            print("Saving", images["category"][0], "images:", index, '/', images.shape[0], end='\r')
         # meera
         # these 4 lines need to be changed
         # i think you would just need to use
@@ -61,7 +62,8 @@ def feature_extraction(images, temp_image_dim, pad_image_dim, x_output_file, y_o
         # time_dimension=3
 
         time_dimension = 0
-        if len(pet.shape) == 4: pet = np.sum(pet, axis=time_dimension)
+        if len(pet.shape) == 4:
+            pet = np.sum(pet, axis=time_dimension)
         pet = normalize(pet)
         offset1 = pad_image_dim[1] - temp_image_dim[1]
         offset2 = pad_image_dim[2] - temp_image_dim[2]

@@ -11,6 +11,7 @@ from keras.utils.generic_utils import get_custom_objects
 curPath = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(curPath)
 from prepare_data import *
+from custom_loss import *
 
 get_custom_objects().update({"dice_metric": dice_metric})
 
@@ -30,14 +31,22 @@ def save_image(X_imgs_to_predict, X_imgs_predicted, Y_labels_to_predict, output_
 
         returns: 0
     """
+    # 代码理解：
+    # 这里slices就是一个range()的返回值，其作用是，save_image()想生成一个n*n的规则图片，但是原mnc文件中有效的图片不一定刚好是这么多，
+    # 所以就根据有效的图数量（X_imgs_to_predict.shape[0]）和n*n（nslices）来决定一个步距，这个步距函数也就是slices了
+    # BTW,如果你想要让n*n,又想让尽量多的细节被保存，那么应该赋nslices为X_imgs_to_predict.shape[0]
+
     # if no slices are defined by user,
     # set slices to evenly sampled slices along entire number of slices in 3d image volume
-    if slices == None: slices = range(0, X_imgs_to_predict.shape[0], int(X_imgs_to_predict.shape[0] / nslices))
+    if slices is None:
+        slices = range(0, X_imgs_to_predict.shape[0], int(X_imgs_to_predict.shape[0] / nslices))
+
     # set number of rows and columns in output image. currently,
     # sqrt() means that the image will be a square, but this could be changed if a more vertical orientation is prefered
-    ncol = int(np.sqrt(nslices))
+    ncol = int(np.sqrt(nslices))  # 决定所生成图片的行、列数量
     nrow = ncol
     fig = plt.figure(1)
+
     # using gridspec because it seems to give a bit more control over the spacing of the images.
     # define a nrow x ncol grid
     # outer_grid = gridspec.GridSpec(nrow, ncol,wspace=0.0, hspace=0.0)
@@ -48,12 +57,20 @@ def save_image(X_imgs_to_predict, X_imgs_predicted, Y_labels_to_predict, output_
             s = slices[slice_index]
             i = col * nrow + row + 1
 
+            if s == 52:
+                from keras_preprocessing import image
+                im = np.expand_dims(X_imgs_to_predict[s], axis=2)
+                image.save_img("/Users/jay/Desktop/GraduationProject/to_predict.png", x=im)
+                im = np.expand_dims(Y_labels_to_predict[s], axis=2)
+                image.save_img("/Users/jay/Desktop/GraduationProject/label.png", x=im)
+                im = np.expand_dims(X_imgs_predicted[s], axis=2)
+                image.save_img("/Users/jay/Desktop/GraduationProject/predicted.png", x=im)
             # normalize the three input numpy arrays.
             # normalizing them independently is necessary so that they all have the same scale
             A = normalize(X_imgs_to_predict[s])
             B = normalize(Y_labels_to_predict[s])
             C = normalize(X_imgs_predicted[s])
-            print("A.shape ", A.shape, "B.shape ", B.shape, "C.shape ", C.shape)
+            # print("A.shape ", A.shape, "B.shape ", B.shape, "C.shape ", C.shape)
 
             # print("\t\t", X_imgs_to_predict[s].max(), X_imgs_to_predict[s].min(),
             #       Y_labels_to_predict[s].max(), Y_labels_to_predict[s].min(),
@@ -65,7 +82,7 @@ def save_image(X_imgs_to_predict, X_imgs_predicted, Y_labels_to_predict, output_
 
             # use imwshow to display all three images
             ax1 = plt.subplot(ncol, nrow, i)
-            plt.imshow(ABC, cmap='hot')
+            plt.imshow(ABC, cmap='hot')  # 生成的图片本身通道为1，本应该是无颜色的，这里使用热图，展示更多细节
             plt.axis('off')
 
             slice_index += 1
@@ -127,25 +144,22 @@ def predict_image(i, model, X_all, Y_all, pet_fn, predict_dir, start, end, loss,
     # set output filename for png file
     image_fn = set_output_image_fn(pet_fn, predict_dir, verbose)
     image_fn = sub('.png', '_' + str(i) + '.png', image_fn)
-    print("Saving prediction to:", image_fn)
+    print("🚩Saving prediction to:", image_fn)
     # apply model to X_imgs_to_predict to get predicted values
-    print("❗️X_imgs_to_predict shape", X_imgs_to_predict.shape)
     X_imgs_predicted = model.predict(X_imgs_to_predict, batch_size=1)
-    print("❗️X_imgs_predicted shape", X_imgs_predicted.shape)
-    if type(X_imgs_predicted) != type(np.array([])): return 1
+    if type(X_imgs_predicted) != type(np.array([])):
+        return 1
 
-    # print("X_imgs_predicted.shape ", X_imgs_predicted.shape,
-    #       "X_imgs_predicted.type ", type(X_imgs_predicted))
-    # print("X_imgs_to_predict shape ", X_imgs_to_predict.shape,
-    #       "Y_labels_to_predict.shape ", Y_labels_to_predict.shape)
-
+    # 在save_image()中，所处理的图通道均为1，所以在当前函数中将X_imgs_to_predict，Y_labels_to_predict，X_imgs_predicted
+    # 全都转换为转为通道为1，因为输入的img和label本来通道都是为1的，所以这里直接使用了reshape，将最后的1直接删掉；
+    # 对于X_imgs_predicted，因为它是模型的输出，所以通道为3，故用argmax()或reshape将其转换为通道为1，具体用什么根据loss函数来判断
     X_imgs_to_predict = X_imgs_to_predict.reshape(X_imgs_to_predict.shape[0:3])
     if loss in categorical_functions:
         X_imgs_predicted = np.argmax(X_imgs_predicted, axis=3)
     else:
-        print("x_predict.shape", X_imgs_predicted.shape)
         X_imgs_predicted = X_imgs_predicted.reshape(X_imgs_predicted.shape[0:3])
     Y_labels_to_predict = Y_labels_to_predict.reshape(Y_labels_to_predict.shape[0:3])
+
     # save slices from 3 numpy arrays to <image_fn>
     save_image(X_imgs_to_predict, X_imgs_predicted, Y_labels_to_predict, image_fn)
     del Y_labels_to_predict
@@ -154,7 +168,9 @@ def predict_image(i, model, X_all, Y_all, pet_fn, predict_dir, start, end, loss,
     return image_fn
 
 
-def predict(model_fn, predict_dir, data_dir, images_fn, loss, evaluate=False, category='test', images_to_predict=None,
+def predict(model_fn, predict_dir, data_dir, images_fn, loss="categorical_crossentropy", evaluate=False,
+            category='test',
+            images_to_predict=None,
             verbose=1):
     """
         '''
@@ -194,25 +210,32 @@ def predict(model_fn, predict_dir, data_dir, images_fn, loss, evaluate=False, ca
         images_to_predict = [int(i) for i in images_to_predict.split(',')]
     # otherwise run prediction for all images
     else:
-        print('No images were specified for prediction.')
+        print('❗️No images were specified for prediction.')
         return 0
 
     # check that the model exists and load it
     if os.path.exists(model_fn):
         model = load_model(model_fn)
-        if verbose >= 1: print("🚩️Model successfully loaded", model)
+        if verbose >= 1:
+            print("🚩Model successfully loaded", model_fn)
     else:
-        print('Error: could not find', model_fn)
-        exit(0)
+        print('❗️Error: could not find', model_fn)
+        sys.exit(1)
 
     # load data for prediction
     x_fn = glob(data_dir + os.sep + category + '_x.npy')
     y_fn = glob(data_dir + os.sep + category + '_y.npy')
-    if x_fn != []: x_fn = x_fn[0]
-    if y_fn != []: y_fn = y_fn[0]
-    X_all = np.load(x_fn)
-    Y_all = np.load(y_fn)
-    if verbose >= 1: print("🚩Data loaded for prediction")
+    if x_fn and y_fn:
+        x_fn = x_fn[0]
+        y_fn = y_fn[0]
+        X_all = np.load(x_fn)
+        Y_all = np.load(y_fn)
+    else:
+        print("❗Error: couldn't find data file, please check:", x_fn, y_fn)
+        sys.exit(1)
+
+    if verbose >= 1:
+        print("🚩Data loaded for prediction")
 
     for i in images_to_predict:
         if i == 0:
@@ -221,20 +244,21 @@ def predict(model_fn, predict_dir, data_dir, images_fn, loss, evaluate=False, ca
             start_sample = int(images.iloc[0:i, ].valid_samples.sum())
         end_sample = int(images.iloc[0:(i + 1), ].valid_samples.sum())
         pet_fn = images.iloc[i,].pet
-        print("current processing:\n", images.iloc[i,])
-        # print(start_sample, end_sample)
-        print(os.path.basename(images.iloc[i,].pet), start_sample, end_sample)
-        # print(predict_dir)
+        if verbose >= 1:
+            print("🚩Currently processing:\n", images.iloc[i,])
+        print("samples:", start_sample, end_sample)
+        # print(os.path.basename(images.iloc[i,].pet), start_sample, end_sample)
         predict_image(i, model, X_all, Y_all, pet_fn, predict_dir, start_sample, end_sample, loss, verbose)
 
-    if verbose >= 1: print("🚩️Prediction completed")
+    if verbose >= 1:
+        print("🚩️Prediction completed")
     return 0
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process inputs for predict.')
     parser.add_argument('--model', dest='model_fn', type=str, help='model to use for prediction')
-    parser.add_argument('--target', dest='predict_dir', type=str, help='directory to save predicted images')
+    parser.add_argument('--predict_dir', dest='predict_dir', type=str, help='directory to save predicted images')
     parser.add_argument('--data_dir', dest='data_dir', type=str, help='data_dir where npy file can be found')
     parser.add_argument('--images_fn', dest='images_fn', type=str,
                         help='filename with images .csv with information about files')
@@ -254,3 +278,11 @@ if __name__ == '__main__':
     predict(model_fn=args.model_fn, predict_dir=args.predict_dir, data_dir=args.data_dir, images_fn=args.images_fn,
             loss=args.loss, evaluate=args.evaluate, category=args.category, images_to_predict=args.images_to_predict,
             verbose=args.verbose)
+
+# python3 module_minc_keras/predict.py \
+#     --model=/Users/jay/Desktop/GraduationProject/unet_at_mri/trained_models/keras_implementation/model_of_unet_at_mri.hdf5 \
+#     --predict_dir=output/prediction \
+#     --data_dir=datasets/mri_pad_4_results/data \
+#     --images_fn=datasets/mri_pad_4_results/report/images.csv \
+#     --images_to_predict=1 \
+#     --loss='categorical_crossentropy'
