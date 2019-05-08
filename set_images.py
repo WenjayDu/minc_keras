@@ -230,9 +230,11 @@ def attribute_category(out, category, category_class, ratio, verbose=1):
         n_unknown = out[(out.category == "unknown") & (category_classes == r)].shape[0]
         if i >= n or n_unknown == 0: break
 
+    real_ratio = out.category.loc[out.category == category].shape[0] / nImages
     if verbose > 0:
         print(category, ": expected/real ratio = %3.2f / %3.2f" % (
-            100. * ratio, 100. * out.category.loc[out.category == category].shape[0] / nImages))
+            100. * ratio, 100. * real_ratio))
+    return real_ratio
 
 
 def set_valid_samples(images):
@@ -310,8 +312,11 @@ def set_images(source_dir, ratios, images_fn, input_str='pet', label_str='brainm
     else:
         category_class = "task"
 
-    attribute_category(out, 'train', category_class, ratios[0])
-    attribute_category(out, 'validate', category_class, ratios[1])
+    real_train_ratio = attribute_category(out, 'train', category_class, ratios[0])
+    real_validate_ratio = attribute_category(out, 'validate', category_class, ratios[1])
+    if (real_train_ratio + real_validate_ratio) * 100. == 100.00:
+        exit("❌real train ratio + real validate ratio = 1, there is no data left for making test dataset, "
+             "please reduce the ratios or train and validate dataset")
     out.category.loc[out.category == "unknown"] = "test"
     # 5.5 Set the number of valid samples per image (some samples exluded because they contain no information)
     set_valid_samples(out)
