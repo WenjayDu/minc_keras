@@ -57,14 +57,6 @@ def save_image(X_imgs_to_predict, X_imgs_predicted, Y_labels_to_predict, output_
             s = slices[slice_index]
             i = col * nrow + row + 1
 
-            if s == 52:
-                from keras_preprocessing import image
-                im = np.expand_dims(X_imgs_to_predict[s], axis=2)
-                image.save_img("/Users/jay/Desktop/GraduationProject/to_predict.png", x=im)
-                im = np.expand_dims(Y_labels_to_predict[s], axis=2)
-                image.save_img("/Users/jay/Desktop/GraduationProject/label.png", x=im)
-                im = np.expand_dims(X_imgs_predicted[s], axis=2)
-                image.save_img("/Users/jay/Desktop/GraduationProject/predicted.png", x=im)
             # normalize the three input numpy arrays.
             # normalizing them independently is necessary so that they all have the same scale
             A = normalize(X_imgs_to_predict[s])
@@ -278,11 +270,3 @@ if __name__ == '__main__':
     predict(model_fn=args.model_fn, predict_dir=args.predict_dir, data_dir=args.data_dir, images_fn=args.images_fn,
             loss=args.loss, evaluate=args.evaluate, category=args.category, images_to_predict=args.images_to_predict,
             verbose=args.verbose)
-
-# python3 module_minc_keras/predict.py \
-#     --model=/Users/jay/Desktop/GraduationProject/unet_at_mri/trained_models/keras_implementation/model_of_unet_at_mri.hdf5 \
-#     --predict_dir=output/prediction \
-#     --data_dir=datasets/mri_pad_4_results/data \
-#     --images_fn=datasets/mri_pad_4_results/report/images.csv \
-#     --images_to_predict=1 \
-#     --loss='categorical_crossentropy'

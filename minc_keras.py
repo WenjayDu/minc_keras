@@ -30,7 +30,7 @@ def setup_dirs(target_dir="./"):
     train_dir = target_dir + os.sep + 'predict' + os.sep + 'train' + os.sep
     test_dir = target_dir + os.sep + 'predict' + os.sep + 'test' + os.sep
     validate_dir = target_dir + os.sep + 'predict' + os.sep + 'validate' + os.sep
-    model_dir = target_dir + os.sep + 'model'
+    model_dir = target_dir + os.sep + 'models'
     create_dir_verbose(train_dir)
     create_dir_verbose(test_dir)
     create_dir_verbose(validate_dir)
