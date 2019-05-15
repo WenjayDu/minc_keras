@@ -315,7 +315,7 @@ def set_images(source_dir, ratios, images_fn, input_str='pet', label_str='brainm
     real_train_ratio = attribute_category(out, 'train', category_class, ratios[0])
     real_validate_ratio = attribute_category(out, 'validate', category_class, ratios[1])
     if (real_train_ratio + real_validate_ratio) * 100. == 100.00:
-        exit("❌real train ratio + real validate ratio = 1, there is no data left for making test dataset, "
+        sys.exit("❌real train ratio + real validate ratio = 1, there is no data left for making test dataset, "
              "please reduce the ratios of train and validate dataset")
     out.category.loc[out.category == "unknown"] = "test"
     # 5.5 Set the number of valid samples per image (some samples exluded because they contain no information)
