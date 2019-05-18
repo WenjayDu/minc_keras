@@ -144,13 +144,15 @@ def prepare_data(source_dir, data_dir, report_dir, input_str, label_str, ratios=
     test_images = images[images['category'] == 'test'].reset_index()
     train_valid_samples = train_images.valid_samples.values.sum()
     validate_valid_samples = validate_images.valid_samples.values.sum()
+    test_valid_samples = test_images.valid_samples.values.sum()
 
-    ### 3) Get spatial dimensions of images 
+    data["num_of_train_samples"] = train_valid_samples
+    data["num_of_validation_samples"] = validate_valid_samples
+    data["num_of_test_samples"] = test_valid_samples
+
+    ### 3) Get spatial dimensions of images
     temp_image_dim = get_image_dim(images.iloc[0].label)
     data["image_dim"] = [temp_image_dim[0], pad(temp_image_dim[1], pad_base), pad(temp_image_dim[2], pad_base)]
-
-    print("original input shape", temp_image_dim)
-    print("input shape after processed", data["image_dim"])
 
     ### 4) Set up dimensions of data tensors to be used for training and validateing. all of the
     if not os.path.exists(data["train_x_fn"] + '.npy') or not os.path.exists(data["train_y_fn"] + '.npy') or clobber:
@@ -167,4 +169,5 @@ def prepare_data(source_dir, data_dir, report_dir, input_str, label_str, ratios=
                            data["test_x_fn"], data["test_y_fn"], data_dir, clobber)
 
     data["batch_size"] = adjust_batch_size(train_valid_samples, validate_valid_samples, batch_size)
+
     return [images, data]
